@@ -8,6 +8,8 @@
 
 `board` contains Autodesk EAGLE schematics and board files. **Note: last revision still untested.**
 
+The pcb has to be 1mm thick.
+
 Note how the pcb has a hole in place of microsd socket. You need to flip the socket and mount it into the hole .
 
 ![](https://i.imgur.com/5X5qVBu.jpg)
