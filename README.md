@@ -1,4 +1,4 @@
-# PS Vita gamecard to micrSD adapter
+# PS Vita gamecard to microSD adapter
 
 ## Software
 
