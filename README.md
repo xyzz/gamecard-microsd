@@ -31,3 +31,11 @@ The adapter does not use Vita gamecard push-pull mechanism. If you feel a spring
 If you accidentally short contacts, the Vita will power off. However, in my testing, this does not seem to cause any permanent damage.
 
 Once you insert the adapter, you can replace microSD without taking the adapter out.
+
+### Alternative designs
+
+You can find some alternative and improved designs here:
+
+* https://github.com/Gadorach/SD2VITA
+
+(Send a pr if you want to be included here)
