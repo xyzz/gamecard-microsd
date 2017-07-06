@@ -37,5 +37,6 @@ Once you insert the adapter, you can replace microSD without taking the adapter 
 You can find some alternative and improved designs here:
 
 * https://github.com/Gadorach/SD2VITA
+* https://www.elotrolado.net/hilo_proyecto-hardmod-para-poner-un-lector-de-micro-sd-en-la-psvita_2229693 (Spanish)
 
 (Send a pr if you want to be included here)
