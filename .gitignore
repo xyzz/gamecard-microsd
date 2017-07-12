@@ -1,1 +1,12 @@
 build
+
+# CMake
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+gamesd
+gamesd.skprx
+gamesd.velf
+stubs.yml
+stubs/
+CMakeFiles/
