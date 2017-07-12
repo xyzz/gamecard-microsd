@@ -12,6 +12,19 @@ mkfs.exfat /dev/sdx
 
 I'm not sure how to do the same on windows. After that, the card still works on both linux and windows, however other devices might have some problems.
 
+### Compile Instructions
+
+First ensure that the Vita SDK is installed.  The easiest way to install it is to use [VDPM](https://github.com/vitasdk/vdpm).  Next, set the `VITASDK` environment variable to the directory where the SDK was installed to and add the SDK binaries to the `PATH` environment variable.  Again, refer to the [VDPM](https://github.com/vitasdk/vdpm) README for more information on this.
+
+And to compile, simply enter the following at the command line.
+
+```bash
+git clone https://github.com/xyzz/gamecard-microsd
+cd gamecard-microsd
+cmake driver/
+make
+```
+
 ## Hardware
 
 `board` contains Autodesk EAGLE schematics and board files. **Note: last revision still untested.**
