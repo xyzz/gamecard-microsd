@@ -27,7 +27,7 @@ make
 
 `board` contains Autodesk EAGLE schematics and board files. **Note: last revision still untested.**
 
-The pcb has to be 1mm thick.
+The pcb has to be 1mm thick. This means I only tested 1mm thick PCBs and found them to work fine. I don't know if other thicknesses work.
 
 Note how the pcb has a hole in place of microsd socket. You need to flip the socket and mount it into the hole .
 
