@@ -51,6 +51,7 @@ Once you insert the adapter, you can replace microSD without taking the adapter 
 
 * Reduced gamecard pads total width by 0.2mm.
 * Removed testpads.
+* Removed unused INS pad on the microSD socket side.
 * Changed routing to reduce amount of VIAs and the chance of electrons falling out of the board.
 
 This design is not tested yet.
