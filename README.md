@@ -35,7 +35,7 @@ Note how the pcb has a hole in place of microsd socket. You need to flip the soc
 
 ![](https://i.imgur.com/5X5qVBu.jpg)
 
-The socket should look like that. You can buy these from aliexpress for about $0.1-0.2/piece.
+The socket should look like that. You can buy these from aliexpress for about $0.1-0.2/piece. Check out [issue 2](https://github.com/xyzz/gamecard-microsd/issues/2) for a buying guide.
 
 There's no case for the adapter. Make sure to cover testpoints with some tape to prevent shorts. (v3.0 of the design has no test pads so you do not have to insulate anything). You also will have to use tweezers to remove adapter from PS Vita. Don't grab the adapter by the socket or you risk damaging it.
 
@@ -68,7 +68,7 @@ Original design.
 
 ### Alternative designs
 
-You can find some alternative and improved designs here:
+You can find some alternative designs here:
 
 * https://github.com/Gadorach/SD2VITA
 * https://www.elotrolado.net/hilo_proyecto-hardmod-para-poner-un-lector-de-micro-sd-en-la-psvita_2229693 (Spanish)
