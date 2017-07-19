@@ -35,13 +35,34 @@ Note how the pcb has a hole in place of microsd socket. You need to flip the soc
 
 The socket should look like that. You can buy these from aliexpress for about $0.1-0.2/piece.
 
-There's no case for the adapter. Make sure to cover testpoints with some tape to prevent shorts. You also will have to use tweezers to remove adapter from PS Vita. Don't grab the adapter by the socket or you risk damaging it.
+There's no case for the adapter. Make sure to cover testpoints with some tape to prevent shorts. (v3.0 of the design has no test pads so you do not have to insulate anything). You also will have to use tweezers to remove adapter from PS Vita. Don't grab the adapter by the socket or you risk damaging it.
 
 The adapter does not use Vita gamecard push-pull mechanism. If you feel a spring while inserting it, this means you are inserting it wrong.
 
 If you accidentally short contacts, the Vita will power off. However, in my testing, this does not seem to cause any permanent damage.
 
 Once you insert the adapter, you can replace microSD without taking the adapter out.
+
+### Version history
+
+#### v3.0
+
+* Reduced gamecard pads total width by 0.2mm.
+* Removed testpads.
+* Changed routing to reduce amount of VIAs and the chance of electrons falling out of the board.
+
+This design is not tested yet.
+
+#### v2.0
+
+* Reduced gamecard pads total width by 1.0mm.
+* Removed fourth microsd socket leg.
+
+This design is not tested by me yet, but other people confirmed it works.
+
+#### v1.0
+
+Original design.
 
 ### Alternative designs
 
