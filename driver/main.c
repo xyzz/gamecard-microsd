@@ -28,6 +28,7 @@
 
 #define MOUNT_POINT_UX0 0x800
 #define MOUNT_POINT_UMA0 0xF00 //used uma0 ID
+#define MOUNT_CONFIG_PATH "ur0:tai/gamesd.cfg"
 
 int module_get_offset(SceUID pid, SceUID modid, int segidx, size_t offset, uintptr_t *addr);
 
@@ -56,6 +57,14 @@ typedef struct {
 	int unk7;
 } SceIoMountPoint;
 
+typedef struct {
+	int microsd_mnt;
+	int mc_mnt;
+} MountConfig;
+
+// Default: microsd mounts to ux0 and mc is not mounted
+static MountConfig mount_cfg = { MOUNT_POINT_UX0, -1 };
+
 static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_UX0 };
 
 static SceIoDevice uma_uma0_dev = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_UMA0 }; //For Vita MU
@@ -80,6 +89,46 @@ static void io_remount(int id) {
 
 static void io_mount(int id) {
 	ksceIoMount(id, NULL, 0, 0, 0, 0);
+}
+
+static void load_mount_cfg() {
+	if (!exists(MOUNT_CONFIG_PATH)) {
+		// TODO: consider creating the file with default settings
+		return;
+	}
+
+	// Read the file contents
+	int fd = ksceIoOpen(MOUNT_CONFIG_PATH, SCE_O_RDONLY, 0);
+	char cfg_contents[32];
+	int bytes_read = ksceIoRead(fd, cfg_contents, 31);
+	ksceIoClose(fd);
+	cfg_contents[bytes_read] = '\x00';
+
+	// Parse the mountpoint for microsd
+	if (strstr(cfg_contents, "microsd=ux0") != NULL) {
+		mount_cfg.microsd_mnt = MOUNT_POINT_UX0;
+	} else if (strstr(cfg_contents, "microsd=uma0") != NULL) {
+		mount_cfg.microsd_mnt = MOUNT_POINT_UMA0;
+	} else {
+		mount_cfg.microsd_mnt = -1;
+	}
+
+	// Parse the mountpoint for memorycard
+	if (strstr(cfg_contents, "memorycard=ux0") != NULL) {
+		mount_cfg.mc_mnt = MOUNT_POINT_UX0;
+	} else if (strstr(cfg_contents, "memorycard=uma0") != NULL) {
+		mount_cfg.mc_mnt = MOUNT_POINT_UMA0;
+	} else {
+		mount_cfg.mc_mnt = -1;
+	}
+
+	// Error check
+	if (mount_cfg.microsd_mnt == mount_cfg.mc_mnt) {
+		// Invalid configuration, both mounted to the same location
+		// Revert to the default config
+		mount_cfg.microsd_mnt = MOUNT_POINT_UX0;
+		mount_cfg.mc_mnt = -1;
+	}
 }
 
 int shellKernelIsUx0Redirected() {
@@ -157,10 +206,14 @@ int redirect_ux0() {
 	// Get important function
 	module_get_offset(KERNEL_PID, info.modid, 0, 0x138C1, (uintptr_t *)&sceIoFindMountPoint);
 
-	shellKernelRedirectUx0();
-	io_remount(MOUNT_POINT_UX0);
-	shellKernelRedirectUma0(); //Added uma0 mount was ux0 ie Vita MU
-	io_mount(MOUNT_POINT_UMA0); //No need to remount since it's not mounted!
+	if (mount_cfg.microsd_mnt == MOUNT_POINT_UX0) {
+		shellKernelRedirectUx0();
+		io_remount(MOUNT_POINT_UX0);
+	}
+	if (mount_cfg.mc_mnt == MOUNT_POINT_UMA0) {
+		shellKernelRedirectUma0(); //Added uma0 mount was ux0 ie Vita MU
+		io_mount(MOUNT_POINT_UMA0); //No need to remount since it's not mounted!
+	}
 
 	return 0;
 }
@@ -216,6 +269,7 @@ void patch_sdstor() {
 
 void _start() __attribute__ ((weak, alias("module_start")));
 int module_start(SceSize args, void *argp) {
+	load_mount_cfg();
 	patch_sdstor();
 	poke_gamecard();
 	register_callback();
