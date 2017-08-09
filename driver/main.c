@@ -59,15 +59,18 @@ typedef struct {
 
 typedef struct {
 	int microsd_mnt;
+	SceIoDevice *microsd_dev;
 	int mc_mnt;
+	SceIoDevice *mc_dev;
 } MountConfig;
 
+static SceIoDevice uma_ux0_dev_sdcard = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_UX0 };
+static SceIoDevice uma_ux0_dev_mc = { "ux0:", "exfatux0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_UX0 };
+static SceIoDevice uma_uma0_dev_sdcard = { "uma0:", "exfatuma0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_UMA0 };
+static SceIoDevice uma_uma0_dev_mc = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_UMA0 };
+
 // Default: microsd mounts to ux0 and mc is not mounted
-static MountConfig mount_cfg = { MOUNT_POINT_UX0, -1 };
-
-static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_UX0 };
-
-static SceIoDevice uma_uma0_dev = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_UMA0 }; //For Vita MU
+static MountConfig mount_cfg = { MOUNT_POINT_UX0, &uma_ux0_dev_sdcard, -1, NULL };
 
 static SceIoMountPoint *(* sceIoFindMountPoint)(int id) = NULL;
 
@@ -107,19 +110,25 @@ static void load_mount_cfg() {
 	// Parse the mountpoint for microsd
 	if (strstr(cfg_contents, "microsd=ux0") != NULL) {
 		mount_cfg.microsd_mnt = MOUNT_POINT_UX0;
+		mount_cfg.microsd_dev = &uma_ux0_dev_sdcard;
 	} else if (strstr(cfg_contents, "microsd=uma0") != NULL) {
 		mount_cfg.microsd_mnt = MOUNT_POINT_UMA0;
+		mount_cfg.microsd_dev = &uma_uma0_dev_sdcard;
 	} else {
 		mount_cfg.microsd_mnt = -1;
+		mount_cfg.microsd_dev = NULL;
 	}
 
 	// Parse the mountpoint for memorycard
 	if (strstr(cfg_contents, "memorycard=ux0") != NULL) {
 		mount_cfg.mc_mnt = MOUNT_POINT_UX0;
+		mount_cfg.mc_dev = &uma_ux0_dev_mc;
 	} else if (strstr(cfg_contents, "memorycard=uma0") != NULL) {
 		mount_cfg.mc_mnt = MOUNT_POINT_UMA0;
+		mount_cfg.mc_dev = &uma_uma0_dev_mc;
 	} else {
 		mount_cfg.mc_mnt = -1;
+		mount_cfg.mc_dev = NULL;
 	}
 
 	// Error check
@@ -127,23 +136,27 @@ static void load_mount_cfg() {
 		// Invalid configuration, both mounted to the same location
 		// Revert to the default config
 		mount_cfg.microsd_mnt = MOUNT_POINT_UX0;
+		mount_cfg.microsd_dev = &uma_ux0_dev_sdcard;
 		mount_cfg.mc_mnt = -1;
+		mount_cfg.mc_dev = NULL;
 	}
 }
 
+// TODO: Make this more generic
 int shellKernelIsUx0Redirected() {
 	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
 	if (!mount) {
 		return -1;
 	}
 
-	if (mount->dev == &uma_ux0_dev && mount->dev2 == &uma_ux0_dev) {
+	if (mount->dev == &uma_ux0_dev_sdcard && mount->dev2 == &uma_ux0_dev_sdcard) {
 		return 1;
 	}
 
 	return 0;
 }
 
+// TODO: Make this more generic
 int shellKernelUnredirectUx0() {
 	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
 	if (!mount) {
@@ -161,36 +174,37 @@ int shellKernelUnredirectUx0() {
 	return 0;
 }
 
+// TODO: Make this more generic
 int shellKernelRedirectUx0() {
 	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
 	if (!mount) {
 		return -1;
 	}
 
-	if (mount->dev != &uma_ux0_dev && mount->dev2 != &uma_ux0_dev) {
+	if (mount->dev != &uma_ux0_dev_sdcard && mount->dev2 != &uma_ux0_dev_sdcard) {
 		ori_dev = mount->dev;
 		ori_dev2 = mount->dev2;
 	}
 
-	mount->dev = &uma_ux0_dev;
-	mount->dev2 = &uma_ux0_dev;
+	mount->dev = &uma_ux0_dev_sdcard;
+	mount->dev2 = &uma_ux0_dev_sdcard;
 
 	return 0;
 }
 
-int shellKernelRedirectUma0() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UMA0);
+int shellKernelRedirect(int mountpoint, SceIoDevice *device) {
+	SceIoMountPoint *mount = sceIoFindMountPoint(mountpoint);
 	if (!mount) {
 		return -1;
 	}
 
-	if (mount->dev != &uma_uma0_dev && mount->dev2 != &uma_uma0_dev) {
+	if (mount->dev != device && mount->dev2 != device) {
 		ori_dev = mount->dev;
 		ori_dev2 = mount->dev2;
 	}
 
-	mount->dev = &uma_uma0_dev;
-	mount->dev2 = &uma_uma0_dev;
+	mount->dev = device;
+	mount->dev2 = device;
 
 	return 0;
 }
@@ -206,13 +220,20 @@ int redirect_ux0() {
 	// Get important function
 	module_get_offset(KERNEL_PID, info.modid, 0, 0x138C1, (uintptr_t *)&sceIoFindMountPoint);
 
-	if (mount_cfg.microsd_mnt == MOUNT_POINT_UX0) {
-		shellKernelRedirectUx0();
+	if (mount_cfg.microsd_mnt > 0 && mount_cfg.microsd_dev != NULL) {
+		shellKernelRedirect(mount_cfg.microsd_mnt, mount_cfg.microsd_dev);
 		io_remount(MOUNT_POINT_UX0);
+		if (mount_cfg.microsd_mnt == MOUNT_POINT_UMA0)
+			io_mount(mount_cfg.microsd_mnt);
+		else
+			io_remount(mount_cfg.microsd_mnt);
 	}
-	if (mount_cfg.mc_mnt == MOUNT_POINT_UMA0) {
-		shellKernelRedirectUma0(); //Added uma0 mount was ux0 ie Vita MU
-		io_mount(MOUNT_POINT_UMA0); //No need to remount since it's not mounted!
+	if (mount_cfg.mc_mnt > 0 && mount_cfg.mc_dev != NULL) {
+		shellKernelRedirect(mount_cfg.mc_mnt, mount_cfg.mc_dev);
+		if (mount_cfg.mc_mnt == MOUNT_POINT_UMA0)
+			io_mount(mount_cfg.mc_mnt);
+		else
+			io_remount(mount_cfg.mc_mnt);
 	}
 
 	return 0;
