@@ -10,6 +10,6 @@ VitaShellKernel:
     VitaShellKernelLibrary:
       syscall: true
       functions:
-        - shellKernelIsUx0Redirected
-        - shellKernelRedirectUx0
-        - shellKernelUnredirectUx0
+        - shellKernelIsRedirected
+        - shellKernelRedirect
+        - shellKernelUnredirect

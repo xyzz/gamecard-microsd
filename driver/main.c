@@ -142,23 +142,21 @@ static void load_mount_cfg() {
 	}
 }
 
-// TODO: Make this more generic
-int shellKernelIsUx0Redirected() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
+int shellKernelIsRedirected(int mountpoint, SceIoDevice *device) {
+	SceIoMountPoint *mount = sceIoFindMountPoint(mountpoint);
 	if (!mount) {
 		return -1;
 	}
 
-	if (mount->dev == &uma_ux0_dev_sdcard && mount->dev2 == &uma_ux0_dev_sdcard) {
+	if (mount->dev == device && mount->dev2 == device) {
 		return 1;
 	}
 
 	return 0;
 }
 
-// TODO: Make this more generic
-int shellKernelUnredirectUx0() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
+int shellKernelUnredirect(int mountpoint) {
+	SceIoMountPoint *mount = sceIoFindMountPoint(mountpoint);
 	if (!mount) {
 		return -1;
 	}
@@ -170,24 +168,6 @@ int shellKernelUnredirectUx0() {
 		ori_dev = NULL;
 		ori_dev2 = NULL;
 	}
-
-	return 0;
-}
-
-// TODO: Make this more generic
-int shellKernelRedirectUx0() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
-	if (!mount) {
-		return -1;
-	}
-
-	if (mount->dev != &uma_ux0_dev_sdcard && mount->dev2 != &uma_ux0_dev_sdcard) {
-		ori_dev = mount->dev;
-		ori_dev2 = mount->dev2;
-	}
-
-	mount->dev = &uma_ux0_dev_sdcard;
-	mount->dev2 = &uma_ux0_dev_sdcard;
 
 	return 0;
 }
