@@ -26,9 +26,8 @@
 
 #include <taihen.h>
 
-#define MOUNT_POINT_ID 0x800
-
-#define MOUNT_POINT_ID2 0xF00 //used uma0 ID
+#define MOUNT_POINT_UX0 0x800
+#define MOUNT_POINT_UMA0 0xF00 //used uma0 ID
 
 int module_get_offset(SceUID pid, SceUID modid, int segidx, size_t offset, uintptr_t *addr);
 
@@ -57,9 +56,9 @@ typedef struct {
 	int unk7;
 } SceIoMountPoint;
 
-static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_ID };
+static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_UX0 };
 
-static SceIoDevice uma_uma0_dev = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_ID2 }; //For Vita MU
+static SceIoDevice uma_uma0_dev = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_UMA0 }; //For Vita MU
 
 static SceIoMountPoint *(* sceIoFindMountPoint)(int id) = NULL;
 
@@ -83,10 +82,8 @@ static void io_mount(int id) {
 	ksceIoMount(id, NULL, 0, 0, 0, 0);
 }
 
-////{Region Scraps
-
 int shellKernelIsUx0Redirected() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID);
+	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
 	if (!mount) {
 		return -1;
 	}
@@ -99,7 +96,7 @@ int shellKernelIsUx0Redirected() {
 }
 
 int shellKernelUnredirectUx0() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID);
+	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
 	if (!mount) {
 		return -1;
 	}
@@ -115,10 +112,8 @@ int shellKernelUnredirectUx0() {
 	return 0;
 }
 
-////}
-
 int shellKernelRedirectUx0() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID);
+	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UX0);
 	if (!mount) {
 		return -1;
 	}
@@ -135,7 +130,7 @@ int shellKernelRedirectUx0() {
 }
 
 int shellKernelRedirectUma0() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID2);
+	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_UMA0);
 	if (!mount) {
 		return -1;
 	}
@@ -163,9 +158,9 @@ int redirect_ux0() {
 	module_get_offset(KERNEL_PID, info.modid, 0, 0x138C1, (uintptr_t *)&sceIoFindMountPoint);
 
 	shellKernelRedirectUx0();
-	io_remount(MOUNT_POINT_ID);
+	io_remount(MOUNT_POINT_UX0);
 	shellKernelRedirectUma0(); //Added uma0 mount was ux0 ie Vita MU
-	io_mount(MOUNT_POINT_ID2); //No need to remount since it's not mounted!
+	io_mount(MOUNT_POINT_UMA0); //No need to remount since it's not mounted!
 
 	return 0;
 }
