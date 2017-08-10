@@ -202,7 +202,6 @@ int redirect_ux0() {
 
 	if (mount_cfg.microsd_mnt > 0 && mount_cfg.microsd_dev != NULL) {
 		shellKernelRedirect(mount_cfg.microsd_mnt, mount_cfg.microsd_dev);
-		io_remount(MOUNT_POINT_UX0);
 		if (mount_cfg.microsd_mnt == MOUNT_POINT_UMA0)
 			io_mount(mount_cfg.microsd_mnt);
 		else
