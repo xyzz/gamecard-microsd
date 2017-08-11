@@ -75,3 +75,14 @@ You can find some alternative designs here:
 * https://www.elotrolado.net/hilo_proyecto-hardmod-para-poner-un-lector-de-micro-sd-en-la-psvita_2229693 (Spanish)
 
 (Send a pr if you want to be included here)
+
+## License
+
+Code inside the `driver` directory is licensed under GPLv3 or later.
+
+Contents of the `board` directory are licensed under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+## Special thanks to
+
+* @motoharu-gosuto for their work on gamecard RE
+* @TheOfficialFlow for providing original version of the usbmc plugin
