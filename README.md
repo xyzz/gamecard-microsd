@@ -45,9 +45,9 @@ If you accidentally short contacts, the Vita will power off. However, in my test
 
 Once you insert the adapter, you can replace microSD without taking the adapter out.
 
-### Version history
+## Version history
 
-#### v3.0
+### v3.0
 
 * Reduced gamecard pads total width by 0.2mm.
 * Removed testpads.
@@ -56,18 +56,18 @@ Once you insert the adapter, you can replace microSD without taking the adapter 
 
 This design is not tested yet.
 
-#### v2.0
+### v2.0
 
 * Reduced gamecard pads total width by 1.0mm.
 * Removed fourth microsd socket leg.
 
 This design is not tested by me yet, but other people confirmed it works.
 
-#### v1.0
+### v1.0
 
 Original design.
 
-### Alternative designs
+## Alternative designs
 
 You can find some alternative designs here:
 
