@@ -28,6 +28,8 @@
 
 #define MOUNT_POINT_ID 0x800
 
+#define MOUNT_POINT_ID2 0xF00 //used uma0 ID
+
 int module_get_offset(SceUID pid, SceUID modid, int segidx, size_t offset, uintptr_t *addr);
 
 typedef struct {
@@ -57,6 +59,8 @@ typedef struct {
 
 static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_ID };
 
+static SceIoDevice uma_uma0_dev = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_ID2 }; //For Vita MU
+
 static SceIoMountPoint *(* sceIoFindMountPoint)(int id) = NULL;
 
 static SceIoDevice *ori_dev = NULL, *ori_dev2 = NULL;
@@ -75,6 +79,12 @@ static void io_remount(int id) {
 	ksceIoMount(id, NULL, 0, 0, 0, 0);
 }
 
+static void io_mount(int id) {
+	ksceIoMount(id, NULL, 0, 0, 0, 0);
+}
+
+////{Region Scraps
+
 int shellKernelIsUx0Redirected() {
 	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID);
 	if (!mount) {
@@ -84,23 +94,6 @@ int shellKernelIsUx0Redirected() {
 	if (mount->dev == &uma_ux0_dev && mount->dev2 == &uma_ux0_dev) {
 		return 1;
 	}
-
-	return 0;
-}
-
-int shellKernelRedirectUx0() {
-	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID);
-	if (!mount) {
-		return -1;
-	}
-
-	if (mount->dev != &uma_ux0_dev && mount->dev2 != &uma_ux0_dev) {
-		ori_dev = mount->dev;
-		ori_dev2 = mount->dev2;
-	}
-
-	mount->dev = &uma_ux0_dev;
-	mount->dev2 = &uma_ux0_dev;
 
 	return 0;
 }
@@ -122,6 +115,42 @@ int shellKernelUnredirectUx0() {
 	return 0;
 }
 
+////}
+
+int shellKernelRedirectUx0() {
+	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID);
+	if (!mount) {
+		return -1;
+	}
+
+	if (mount->dev != &uma_ux0_dev && mount->dev2 != &uma_ux0_dev) {
+		ori_dev = mount->dev;
+		ori_dev2 = mount->dev2;
+	}
+
+	mount->dev = &uma_ux0_dev;
+	mount->dev2 = &uma_ux0_dev;
+
+	return 0;
+}
+
+int shellKernelRedirectUma0() {
+	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID2);
+	if (!mount) {
+		return -1;
+	}
+
+	if (mount->dev != &uma_uma0_dev && mount->dev2 != &uma_uma0_dev) {
+		ori_dev = mount->dev;
+		ori_dev2 = mount->dev2;
+	}
+
+	mount->dev = &uma_uma0_dev;
+	mount->dev2 = &uma_uma0_dev;
+
+	return 0;
+}
+
 // ux0 redirect by theflow
 int redirect_ux0() {
 	// Get tai module info
@@ -135,6 +164,8 @@ int redirect_ux0() {
 
 	shellKernelRedirectUx0();
 	io_remount(MOUNT_POINT_ID);
+	shellKernelRedirectUma0(); //Added uma0 mount was ux0 ie Vita MU
+	io_mount(MOUNT_POINT_ID2); //No need to remount since it's not mounted!
 
 	return 0;
 }
@@ -193,8 +224,13 @@ int module_start(SceSize args, void *argp) {
 	patch_sdstor();
 	poke_gamecard();
 	register_callback();
+	if(exists("sdstor0:gcd-lp-ign-entire"))
+	{
 	redirect_ux0();
-
+	}
+	else
+	{
+	}
 	return SCE_KERNEL_START_SUCCESS;
 }
 
