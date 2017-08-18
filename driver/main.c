@@ -224,8 +224,13 @@ int module_start(SceSize args, void *argp) {
 	patch_sdstor();
 	poke_gamecard();
 	register_callback();
+	if(exists("sdstor0:gcd-lp-ign-entire"))
+	{
 	redirect_ux0();
-
+	}
+	else
+	{
+	}
 	return SCE_KERNEL_START_SUCCESS;
 }
 
