@@ -12,6 +12,12 @@ mkfs.exfat /dev/sdx # (without a number)
 
 On Windows, this works: https://redd.it/6o4gqh / https://redd.it/6o62vx
 
+On Mac this should work (Tested on OSX 10.12):
+
+```
+sudo newfs_exfat -R /dev/diskn  (where n is the number of the mounted sd card)
+```
+
 After that, the card still works on both Linux and Windows, however other devices might have some problems.
 
 ### Compiling the driver
