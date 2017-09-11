@@ -162,7 +162,7 @@ int poke_gamecard() {
 	return 0;
 }
 
-int suspend_callback(int resume, int eventid, void *args, void *opt) {
+int sysevent_handler(int resume, int eventid, void *args, void *opt) {
 	if (eventid != 0x100000)
 		return 0;
 
@@ -171,8 +171,8 @@ int suspend_callback(int resume, int eventid, void *args, void *opt) {
 	return 0;
 }
 
-int register_callback() {
-	ksceKernelRegisterSuspendCallback("gamesd", suspend_callback, NULL);
+int register_sysevent() {
+	ksceKernelRegisterSysEventHandler("gamesd", sysevent_handler, NULL);
 }
 
 int gen_init_2_patch_uid;
@@ -192,7 +192,7 @@ void _start() __attribute__ ((weak, alias("module_start")));
 int module_start(SceSize args, void *argp) {
 	patch_sdstor();
 	poke_gamecard();
-	register_callback();
+	register_sysevent();
 	redirect_ux0();
 
 	return SCE_KERNEL_START_SUCCESS;
