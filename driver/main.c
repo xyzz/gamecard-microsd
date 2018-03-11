@@ -131,7 +131,19 @@ int redirect_ux0() {
 		return -1;
 
 	// Get important function
-	module_get_offset(KERNEL_PID, info.modid, 0, 0x138C1, (uintptr_t *)&sceIoFindMountPoint);
+	switch (info.module_nid) {
+		case 0x9642948C: // 3.60 retail
+			module_get_offset(KERNEL_PID, info.modid, 0, 0x138C1, (uintptr_t *)&sceIoFindMountPoint);
+			break;
+
+		case 0xA96ACE9D: // 3.65 retail
+		case 0x3347A95F: // 3.67 retail
+			module_get_offset(KERNEL_PID, info.modid, 0, 0x182F5, (uintptr_t *)&sceIoFindMountPoint);
+			break;
+
+		default:
+			return -1;
+	}
 
 	shellKernelRedirectUx0();
 	io_remount(MOUNT_POINT_ID);
