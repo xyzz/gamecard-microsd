@@ -138,6 +138,7 @@ int redirect_ux0() {
 
 		case 0xA96ACE9D: // 3.65 retail
 		case 0x3347A95F: // 3.67 retail
+		case 0x90DA33DE: // 3.68 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x182F5, (uintptr_t *)&sceIoFindMountPoint);
 			break;
 
