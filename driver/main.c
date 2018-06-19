@@ -226,7 +226,7 @@ void patch_appmgr() {
 void _start() __attribute__ ((weak, alias("module_start")));
 int module_start(SceSize args, void *argp) {
 	patch_sdstor();
-  patch_appmgr();
+	patch_appmgr();
 	poke_gamecard();
 	register_sysevent();
 	redirect_ux0();
