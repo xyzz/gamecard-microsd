@@ -201,9 +201,32 @@ void patch_sdstor() {
 	}
 }
 
+// allow Memory Card remount
+void patch_appmgr() {
+	tai_module_info_t appmgr_info;
+	appmgr_info.size = sizeof(tai_module_info_t);
+	if (taiGetModuleInfoForKernel(KERNEL_PID, "SceAppMgr", &appmgr_info) >= 0) {
+		uint32_t nop_nop_opcode = 0xBF00BF00;
+		switch (appmgr_info.module_nid) {
+			case 0xDBB29DB7: // 3.60 retail
+			case 0x1C9879D6: // 3.65 retail
+				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB338, &nop_nop_opcode, 4);
+				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB368, &nop_nop_opcode, 2);
+				break;
+				
+			case 0x54E2E984: // 3.67 retail
+			case 0xC3C538DE: // 3.68 retail
+				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB344, &nop_nop_opcode, 4);
+				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB374, &nop_nop_opcode, 2);
+				break;
+		}
+	}
+}
+
 void _start() __attribute__ ((weak, alias("module_start")));
 int module_start(SceSize args, void *argp) {
 	patch_sdstor();
+  patch_appmgr();
 	poke_gamecard();
 	register_sysevent();
 	redirect_ux0();
