@@ -20,6 +20,7 @@
 #include <psp2kern/kernel/modulemgr.h>
 #include <psp2kern/kernel/sysmem.h>
 #include <psp2kern/io/fcntl.h>
+#include <psp2kern/kernel/threadmgr.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -60,14 +61,6 @@ static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entir
 static SceIoMountPoint *(* sceIoFindMountPoint)(int id) = NULL;
 
 static SceIoDevice *ori_dev = NULL, *ori_dev2 = NULL;
-
-static int exists(const char *path) {
-	int fd = ksceIoOpen(path, SCE_O_RDONLY, 0);
-	if (fd < 0)
-		return 0;
-	ksceIoClose(fd);
-	return 1;
-}
 
 static void io_remount(int id) {
 	ksceIoUmount(id, 0, 0, 0);
@@ -175,30 +168,58 @@ int poke_gamecard() {
 	return 0;
 }
 
-int sysevent_handler(int resume, int eventid, void *args, void *opt) {
-	if (eventid != 0x100000)
+tai_hook_ref_t hook_get_partition;
+tai_hook_ref_t hook_write;
+tai_hook_ref_t hook_mediaid;
+
+uint32_t magic = 0x7FFFFFFF;
+
+void *sdstor_mediaid;
+
+void *my_get_partition(const char *name, size_t len) {
+	void *ret = TAI_CONTINUE(void*, hook_get_partition, name, len);
+	if (!ret && len == 18 && strcmp(name, "gcd-lp-act-mediaid") == 0) {
+		return &magic;
+	}
+	return ret;
+}
+
+uint32_t my_write(uint8_t *dev, void *buf, uint32_t sector, uint32_t size) {
+	if (dev[36] == 1 && sector == magic) {
 		return 0;
-
-	poke_gamecard();
-
-	return 0;
+	}
+	return TAI_CONTINUE(uint32_t, hook_write, dev, buf, sector, size);
 }
 
-int register_sysevent() {
-	ksceKernelRegisterSysEventHandler("gamesd", sysevent_handler, NULL);
-}
+uint32_t my_mediaid(uint8_t *dev) {
+	uint32_t ret = TAI_CONTINUE(uint32_t, hook_mediaid, dev);
 
-int gen_init_2_patch_uid;
+	if (dev[36] == 1) {
+		memset(dev + 20, 0xFF, 16);
+		memset(sdstor_mediaid, 0xFF, 16);
+
+		return magic;
+	}
+	return ret;
+}
 
 // allow SD cards, patch by motoharu
 void patch_sdstor() {
 	tai_module_info_t sdstor_info;
 	sdstor_info.size = sizeof(tai_module_info_t);
-	if (taiGetModuleInfoForKernel(KERNEL_PID, "SceSdstor", &sdstor_info) >= 0) {
-		//patch for proc_initialize_generic_2 - so that sd card type is not ignored
-		char zeroCallOnePatch[4] = {0x01, 0x20, 0x00, 0xBF};
-		gen_init_2_patch_uid = taiInjectDataForKernel(KERNEL_PID, sdstor_info.modid, 0, 0x2498, zeroCallOnePatch, 4); //patch (BLX) to (MOVS R0, #1 ; NOP)
-	}
+	if (taiGetModuleInfoForKernel(KERNEL_PID, "SceSdstor", &sdstor_info) < 0)
+		return;
+
+	module_get_offset(KERNEL_PID, sdstor_info.modid, 1, 0x1720, (uintptr_t *) &sdstor_mediaid);
+
+	// patch for proc_initialize_generic_2 - so that sd card type is not ignored
+	char zeroCallOnePatch[4] = {0x01, 0x20, 0x00, 0xBF};
+	taiInjectDataForKernel(KERNEL_PID, sdstor_info.modid, 0, 0x2498, zeroCallOnePatch, 4); //patch (BLX) to (MOVS R0, #1 ; NOP)
+	taiInjectDataForKernel(KERNEL_PID, sdstor_info.modid, 0, 0x2940, zeroCallOnePatch, 4);
+
+	taiHookFunctionOffsetForKernel(KERNEL_PID, &hook_get_partition, sdstor_info.modid, 0, 0x142C, 1, my_get_partition);
+	taiHookFunctionOffsetForKernel(KERNEL_PID, &hook_write, sdstor_info.modid, 0, 0x2C58, 1, my_write);
+	taiHookFunctionOffsetForKernel(KERNEL_PID, &hook_mediaid, sdstor_info.modid, 0, 0x3D54, 1, my_mediaid);
 }
 
 // allow Memory Card remount
@@ -228,7 +249,6 @@ int module_start(SceSize args, void *argp) {
 	patch_sdstor();
 	patch_appmgr();
 	poke_gamecard();
-	register_sysevent();
 	redirect_ux0();
 
 	return SCE_KERNEL_START_SUCCESS;
