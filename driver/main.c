@@ -257,7 +257,7 @@ void patch_appmgr() {
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB338, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB368, &nop_nop_opcode, 2);
 				break;
-				
+
 			case 0x54E2E984: // 3.67 retail
 			case 0xC3C538DE: // 3.68 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB344, &nop_nop_opcode, 4);
