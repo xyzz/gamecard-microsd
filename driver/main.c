@@ -160,6 +160,7 @@ int redirect_ux0() {
 
 		case 0xF16E72C7: // 3.69 retail
 		case 0x81A49C2B: // 3.70 retail
+		case 0xF2D59083: // 3.71 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x18735, (uintptr_t *)&sceIoFindMountPoint);
 			break;
 
@@ -271,6 +272,7 @@ void patch_appmgr() {
 
 			case 0x321E4852: // 3.69 retail
 			case 0x700DA0CD: // 3.70 retail
+			case 0xF7846B4E: // 3.71 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB34C, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB37C, &nop_nop_opcode, 2);
 				break;
