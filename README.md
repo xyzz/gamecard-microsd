@@ -15,7 +15,12 @@ On Windows, this works: https://redd.it/6o4gqh / https://redd.it/6o62vx
 On Mac this should work (Tested on OSX 10.12):
 
 ```
-sudo newfs_exfat -R /dev/diskn  (where n is the number of the mounted sd card)
+# List your attached storage, find your sd card
+sudo DiskUtil list
+# If necessary, unmount volume
+sudo diskutil unmountdisk /dev/diskn (where n is the number of the mounted sd card)
+# Format drive
+sudo newfs_exfat -R /dev/diskn  
 ```
 
 After that, the card still works on both Linux and Windows, however other devices might have some problems.
