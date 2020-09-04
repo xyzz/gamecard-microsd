@@ -149,14 +149,17 @@ int redirect_ux0() {
 
 	// Get important function
 	switch (info.module_nid) {
-		case 0x7A1DBDE6: // 3.55 retail (untested)
-		case 0xEF58597E: // 3.57 retail (untested)
+		case 0x7A1DBDE6: // 3.55 retail
+		case 0xEF58597E: // 3.57 retail
 		case 0x9642948C: // 3.60 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x138C1, (uintptr_t *)&sceIoFindMountPoint);
 			break;
 
-		case 0xE923F19C: // 3.61 retail (untested)
-		case 0x5FC2B87D: // 3.63 retail (untested)
+		case 0xE923F19C: // 3.61 retail
+			module_get_offset(KERNEL_PID, info.modid, 0, 0x138D5, (uintptr_t *)&sceIoFindMountPoint);
+			break;
+
+		case 0x5FC2B87D: // 3.63 retail
 		case 0xA96ACE9D: // 3.65 retail
 		case 0x3347A95F: // 3.67 retail
 		case 0x90DA33DE: // 3.68 retail
@@ -167,7 +170,7 @@ int redirect_ux0() {
 		case 0x81A49C2B: // 3.70 retail
 		case 0xF2D59083: // 3.71 retail
 		case 0x9C16D40A: // 3.72 retail
-		case 0xF7794A6C: // 3.73 retail (untested)
+		case 0xF7794A6C: // 3.73 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x18735, (uintptr_t *)&sceIoFindMountPoint);
 			break;
 
