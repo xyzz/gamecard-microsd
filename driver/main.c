@@ -268,11 +268,11 @@ void patch_appmgr() {
 	if (taiGetModuleInfoForKernel(KERNEL_PID, "SceAppMgr", &appmgr_info) >= 0) {
 		uint32_t nop_nop_opcode = 0xBF00BF00;
 		switch (appmgr_info.module_nid) {
-			case 0x94CEFE4B: // 3.55 retail (untested)
-			case 0xDFBC288C: // 3.57 retail (untested)
+			case 0x94CEFE4B: // 3.55 retail
+			case 0xDFBC288C: // 3.57 retail
 			case 0xDBB29DB7: // 3.60 retail
-			case 0xB5F8EA7C: // 3.61 retail (untested)
-			case 0x23B967C5: // 3.63 retail (untested)
+			case 0xB5F8EA7C: // 3.61 retail
+			case 0x23B967C5: // 3.63 retail
 			case 0x1C9879D6: // 3.65 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB338, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB368, &nop_nop_opcode, 2);
@@ -288,7 +288,7 @@ void patch_appmgr() {
 			case 0x700DA0CD: // 3.70 retail
 			case 0xF7846B4E: // 3.71 retail
 			case 0xA8E80BA8: // 3.72 retail
-			case 0xB299D195: // 3.73 retail (untested)
+			case 0xB299D195: // 3.73 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB34C, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB37C, &nop_nop_opcode, 2);
 				break;
