@@ -1,7 +1,7 @@
 /*
 	gamecard-microsd
 	Copyright 2017-2018, xyz
-	Copyright 2020, Yoti
+	Copyright 2020-2022, Yoti
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -171,6 +171,7 @@ int redirect_ux0() {
 		case 0xF2D59083: // 3.71 retail
 		case 0x9C16D40A: // 3.72 retail
 		case 0xF7794A6C: // 3.73 retail
+		case 0x796DAFAF: // 3.74 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x18735, (uintptr_t *)&sceIoFindMountPoint);
 			break;
 
@@ -289,6 +290,7 @@ void patch_appmgr() {
 			case 0xF7846B4E: // 3.71 retail
 			case 0xA8E80BA8: // 3.72 retail
 			case 0xB299D195: // 3.73 retail
+			case 0x30007BD3: // 3.74 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB34C, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB37C, &nop_nop_opcode, 2);
 				break;
