@@ -1,6 +1,7 @@
 /*
 	gamecard-microsd
 	Copyright 2017-2018, xyz
+	Copyright 2020-2022, Yoti
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -148,10 +149,17 @@ int redirect_ux0() {
 
 	// Get important function
 	switch (info.module_nid) {
+		case 0x7A1DBDE6: // 3.55 retail
+		case 0xEF58597E: // 3.57 retail
 		case 0x9642948C: // 3.60 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x138C1, (uintptr_t *)&sceIoFindMountPoint);
 			break;
 
+		case 0xE923F19C: // 3.61 retail
+			module_get_offset(KERNEL_PID, info.modid, 0, 0x138D5, (uintptr_t *)&sceIoFindMountPoint);
+			break;
+
+		case 0x5FC2B87D: // 3.63 retail
 		case 0xA96ACE9D: // 3.65 retail
 		case 0x3347A95F: // 3.67 retail
 		case 0x90DA33DE: // 3.68 retail
@@ -162,6 +170,8 @@ int redirect_ux0() {
 		case 0x81A49C2B: // 3.70 retail
 		case 0xF2D59083: // 3.71 retail
 		case 0x9C16D40A: // 3.72 retail
+		case 0xF7794A6C: // 3.73 retail
+		case 0x796DAFAF: // 3.74 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x18735, (uintptr_t *)&sceIoFindMountPoint);
 			break;
 
@@ -259,7 +269,11 @@ void patch_appmgr() {
 	if (taiGetModuleInfoForKernel(KERNEL_PID, "SceAppMgr", &appmgr_info) >= 0) {
 		uint32_t nop_nop_opcode = 0xBF00BF00;
 		switch (appmgr_info.module_nid) {
+			case 0x94CEFE4B: // 3.55 retail
+			case 0xDFBC288C: // 3.57 retail
 			case 0xDBB29DB7: // 3.60 retail
+			case 0xB5F8EA7C: // 3.61 retail
+			case 0x23B967C5: // 3.63 retail
 			case 0x1C9879D6: // 3.65 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB338, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB368, &nop_nop_opcode, 2);
@@ -275,6 +289,8 @@ void patch_appmgr() {
 			case 0x700DA0CD: // 3.70 retail
 			case 0xF7846B4E: // 3.71 retail
 			case 0xA8E80BA8: // 3.72 retail
+			case 0xB299D195: // 3.73 retail
+			case 0x30007BD3: // 3.74 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB34C, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB37C, &nop_nop_opcode, 2);
 				break;
